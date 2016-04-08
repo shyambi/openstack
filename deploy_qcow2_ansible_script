@@ -1,0 +1,62 @@
+- hosts: 127.0.0.1
+  connection: local
+  vars_files:
+   - vars/instance-config.yml
+   - vars/openstack-config.yml
+
+  tasks:
+  - name: Add host entry to inventory file
+    add_host: name={{floating_ip }} groups=image-vm
+
+  - name: Clean existing instance image
+    os_image:
+     auth: '{{auth}}'
+     name: '{{image_name}}'
+     state: absent
+  
+  - name: Upload instance image
+    os_image:
+     auth: '{{auth}}'
+     name: '{{image_name}}'
+     container_format: bare
+     disk_format: qcow2
+     state: present
+     filename: '{{image_path}}'
+
+  - name: Clean existing instance flavor
+    os_nova_flavor:
+     auth='{{auth}}'
+     state=absent
+     name='{{flavor_name}}'
+
+  - name: Create instance flavor
+    os_nova_flavor:
+     auth='{{auth}}'
+     state=present
+     name='{{flavor_name}}'
+     ram=2048
+     vcpus=2
+     disk=10
+     ephemeral=1
+     swap=256
+
+  - name: Clean existing instance image 
+    os_server:
+     auth: '{{auth}}'
+     state: absent
+     name: '{{instance_vm_name}}'
+     timeout: 200
+
+  - name: Create openstack instance
+    os_server:
+     auth: '{{auth}}'
+     state: present
+     name: '{{instance_vm_name}}'
+     image: '{{image_name}}'
+     key_name: '{{key_name}}'
+     timeout: 400
+     flavor: '{{flavor_name}}'
+     nics:
+      - net-id: '{{fixed_network_id}}'
+     security_groups: '{{security_group_name}}'
+     floating_ips: '{{floating_ip}}' 
