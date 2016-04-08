@@ -1,0 +1,10 @@
+auth:
+    auth_url: http://IP:35357/v3
+    username: <>
+    password: <>
+    project_name: <>
+    project_domain_id: <>
+    user_domain_id: <>
+    tenant_name: <>
+image_api_version: 2
+volume_api_version: 2
